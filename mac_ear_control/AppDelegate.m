@@ -7,7 +7,7 @@
 //
 
 #import "AppDelegate.h"
-#import "DDHidLib.h"
+#import "DDHidAppleMikey.h"
 #import "MediaKey.h"
 #import "IOKit/hid/IOHIDManager.h"
 #include <IOKit/usb/IOUSBLib.h>
@@ -39,7 +39,7 @@
     IOHIDManagerScheduleWithRunLoop(HIDManager, CFRunLoopGetMain(), kCFRunLoopDefaultMode);
     IOReturn IOReturn = IOHIDManagerOpen(HIDManager, kIOHIDOptionsTypeNone);
     if(IOReturn) puts("IOHIDManagerOpen failed.");
-    [self toggleDeckIcon:true];
+    [self toggleDockIcon:true];
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
@@ -75,11 +75,11 @@ static void Handle_UsbDetectionCallback2(void *inContext, IOReturn inResult, voi
         
         [mikeys makeObjectsPerformSelector: @selector(setDelegate:)
                                 withObject: self];
+        NSLog(@"%p", [mikeys firstObject]);
         [self setMikey: [mikeys firstObject]];
     }
     @catch (NSException *e) {
         NSLog(@"%@", e.description);
-        NSLog(@"error!");
         return false;
     }
     return true;
@@ -88,18 +88,32 @@ static void Handle_UsbDetectionCallback2(void *inContext, IOReturn inResult, voi
 - (void) setMikey: (DDHidAppleMikey *) newMikey
 {
     if (newMikey != nil) {
-        if (mCurrentMikey != nil)
-        {
+        if (mCurrentMikey != nil) {
             [mCurrentMikey stopListening];
+        } else {
+            NSLog(@"New earphone connected.");
         }
         mCurrentMikey = newMikey;
         [mCurrentMikey startListening];
+        statusItem.image = [NSImage imageNamed:@"MenuItemOn"];
     } else {
+        NSLog(@"No earphone connected.");
+        statusItem.image = [NSImage imageNamed:@"MenuItemTemplate"];
         [mCurrentMikey stopListening];
+        mCurrentMikey = nil;
     }
 }
 
-- (void) toggleDeckIcon : (bool) disable {
+- (void) toggleConnectedIcon : (bool) connected {
+    // from http://stackoverflow.com/a/9220857/1813988
+    if (connected) {
+        [NSApp setActivationPolicy: NSApplicationActivationPolicyProhibited];
+    } else {
+        [NSApp setActivationPolicy: NSApplicationActivationPolicyAccessory];
+    }
+}
+
+- (void) toggleDockIcon : (bool) disable {
     // from http://stackoverflow.com/a/9220857/1813988
     if (disable) {
         [NSApp setActivationPolicy: NSApplicationActivationPolicyProhibited];
@@ -108,14 +122,14 @@ static void Handle_UsbDetectionCallback2(void *inContext, IOReturn inResult, voi
     }
 }
 
-- (IBAction) showDeckIcon:(id)sender {
-    NSLog(@"showDeckIcon");
-    [self toggleDeckIcon:false];
+- (IBAction) showDockIcon:(id)sender {
+    NSLog(@"showDockIcon");
+    [self toggleDockIcon:false];
 }
 
-- (IBAction) hideDeckIcon:(id)sender {
-    NSLog(@"hideDeckIcon");
-    [self toggleDeckIcon:true];
+- (IBAction) hideDockIcon:(id)sender {
+    NSLog(@"hideDockIcon");
+    [self toggleDockIcon:true];
 }
 
 @end
@@ -146,7 +160,6 @@ static void Handle_UsbDetectionCallback2(void *inContext, IOReturn inResult, voi
             case kHIDUsage_GD_SystemMenuUp:
                 NSLog(@"sound up");
                 [MediaKey send:NX_KEYTYPE_SOUND_UP];
-                //[self sendMessagesToConnections:@selector(volumeUp)];
                 break;
             case kHIDUsage_GD_SystemMenuDown:
                 NSLog(@"sound down");
