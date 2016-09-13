@@ -3,7 +3,7 @@
 A simple Mac app to capture earphone button events and translate them to multimedia key event. Tested on Mac OS X EI Captain (10.11.6)
 
 ## Usage
-1. Download the [Latest built version](https://pan.baidu.com/s/1boXWdVT)
+1. Download the [latest version](https://github.com/7hil/mac_ear_control/releases/download/0.1/mac_ear_control.app.zip)
 2. unzip it and run the .app file directly.
 3. Now you can play or pause the defualt player with your earphone control.
 
