@@ -64,7 +64,9 @@ static void Handle_UsbDetectionCallback2(void *inContext, IOReturn inResult, voi
 - (void) setupMenuItem {
     if(statusItem == nil) {
         statusItem = [[NSStatusBar systemStatusBar] statusItemWithLength:NSSquareStatusItemLength];
-        statusItem.image = [NSImage imageNamed:@"MenuItemTemplate"];
+        NSImage *image = [NSImage imageNamed:@"MenuItemTemplate"];
+        [image setTemplate:YES];
+        statusItem.image = image;
         statusItem.menu = _statusItemMenu;
     }
 }
@@ -95,10 +97,14 @@ static void Handle_UsbDetectionCallback2(void *inContext, IOReturn inResult, voi
         }
         mCurrentMikey = newMikey;
         [mCurrentMikey startListening];
-        statusItem.image = [NSImage imageNamed:@"MenuItemOn"];
+        NSImage *image = [NSImage imageNamed:@"MenuItemOn"];
+        [image setTemplate:YES];
+        statusItem.image = image;
     } else {
         NSLog(@"No earphone connected.");
-        statusItem.image = [NSImage imageNamed:@"MenuItemTemplate"];
+        NSImage *image = [NSImage imageNamed:@"MenuItemTemplate"];
+        [image setTemplate:YES];
+        statusItem.image = image;
         [mCurrentMikey stopListening];
         mCurrentMikey = nil;
     }
